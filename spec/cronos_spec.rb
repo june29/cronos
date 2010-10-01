@@ -46,4 +46,21 @@ describe Cronos do
       cronos.next(Time.local(2010, 10, 10, 10, 20)).should == Time.local(2010, 10, 10, 10, 21)
     end
   end
+
+  describe "の曜日指定について" do
+    it "0は日曜日と解釈されること" do
+      cronos = Cronos.new("0 0 * * 0")
+      cronos.next(Time.local(2010, 10, 10, 10, 10)).should == Time.local(2010, 10, 17, 0, 0)
+    end
+
+    it "6は土曜日と解釈されること" do
+      cronos = Cronos.new("0 0 * * 6")
+      cronos.next(Time.local(2010, 10, 10, 10, 10)).should == Time.local(2010, 10, 16, 0, 0)
+    end
+
+    it "7は日曜日と解釈されること" do
+      cronos = Cronos.new("0 0 * * 7")
+      cronos.next(Time.local(2010, 10, 10, 10, 10)).should == Time.local(2010, 10, 17, 0, 0)
+    end
+  end
 end

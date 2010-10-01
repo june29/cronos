@@ -21,7 +21,7 @@ class Cronos
       else
         @definition[field] = array[index].split(",").map { |element|
           if element =~ /^\d+$/
-            element.to_i
+            field == :wday ? (element.to_i % 7) : element.to_i
           elsif element =~ /^(\d+)\-(\d+)$/
             ($1.to_i..$2.to_i).to_a
           end
