@@ -1,23 +1,33 @@
 class Cronos
-  UNIT            = 60
+  UNIT     = 60
+  FIELDS   = [:min, :hour, :day, :month, :wday]
+  UNIVERSE = { :min   => (0..59),
+               :hour  => (0..23),
+               :day   => (1..31),
+               :month => (1..12),
+               :wday  => (0..6)  }
 
-  MINUTE          = (0..59)
-  HOUR            = (0..23)
-  DAY             = (1..31)
-  MONTH           = (1..12)
-  DAY_OF_THE_WEEK = (0..6)
+  attr_reader :format
 
-  attr_reader :setting
+  def initialize(format)
+    @format = format
+    array = @format.split(" ")
 
-  def initialize(setting)
-    @setting = setting
-    array = @setting.split(" ")
+    @definition = {}
 
-    @minute          = array[0] == "*" ? MINUTE          : [array[0].to_i]
-    @hour            = array[1] == "*" ? HOUR            : [array[1].to_i]
-    @day             = array[2] == "*" ? DAY             : [array[2].to_i]
-    @month           = array[3] == "*" ? MONTH           : [array[3].to_i]
-    @day_of_the_week = array[4] == "*" ? DAY_OF_THE_WEEK : [array[4].to_i]
+    FIELDS.each_with_index { |field, index|
+      if array[index] == "*"
+        @definition[field] = UNIVERSE[field]
+      else
+        @definition[field] = array[index].split(",").map { |element|
+          if element =~ /^\d+$/
+            element.to_i
+          elsif element =~ /^(\d+)\-(\d+)$/
+            ($1.to_i..$2.to_i).to_a
+          end
+        }.flatten
+      end
+    }
   end
 
   def next(pointer = Time.now)
@@ -26,12 +36,7 @@ class Cronos
     loop {
       pointer += UNIT
 
-      if           @minute.include?(pointer.min)   &&
-                     @hour.include?(pointer.hour)  &&
-                      @day.include?(pointer.day)   &&
-                    @month.include?(pointer.month) &&
-          @day_of_the_week.include?(pointer.wday)
-
+      if FIELDS.all? { |field| @definition[field].include? pointer.send(field) }
         return pointer
       end
     }
