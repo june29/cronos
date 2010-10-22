@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require "rubygems"
-require "spec"
+require "rspec"
 
 require "cronos"
 
@@ -61,6 +61,14 @@ describe Cronos do
     it "7は日曜日と解釈されること" do
       cronos = Cronos.new("0 0 * * 7")
       cronos.next(Time.local(2010, 10, 10, 10, 10)).should == Time.local(2010, 10, 17, 0, 0)
+    end
+  end
+
+  describe "に複数のスケジュール指定したとき" do
+    it "は next としていずれかの指定を満たす時刻を返す" do
+      cronos = Cronos.new("45 23 * * *", "15 0 * * *")
+      cronos.next(Time.local(2010, 10, 12, 23, 44)).should == Time.local(2010, 10, 12, 23, 45)
+      cronos.next(Time.local(2010, 10, 12, 23, 45)).should == Time.local(2010, 10, 13, 0, 15)
     end
   end
 end
