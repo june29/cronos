@@ -13,13 +13,28 @@ class Cronos
     }
   end
 
-  def next(pointer = Time.now)
-    pointer = Time.local(pointer.year, pointer.month, pointer.day, pointer.hour, pointer.min)
+  def schedule(parameters)
+    return schedules(parameters.merge({ :size => 1 })).first
+  end
 
-    begin
+  def schedules(parameters)
+    size = parameters.delete(:size) || 1
+    from = parameters.delete(:from) || Time.now
+    to   = parameters.delete(:to)   || from + (60 * 60 * 24)
+
+    pointer = from
+
+    results = []
+
+    while results.size < size
       pointer += UNIT
-    end until @specifications.any? { |specification| specification.matches(pointer) }
-    pointer
+
+      if @specifications.any? { |specification| specification.matches pointer }
+        results << pointer
+      end
+    end
+
+    return results.sort
   end
 
   class Specification
