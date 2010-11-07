@@ -18,15 +18,21 @@ class Cronos
   end
 
   def schedules(parameters)
-    size = parameters.delete(:size) || 1
     from = parameters.delete(:from) || Time.now
-    to   = parameters.delete(:to)   || from + (60 * 60 * 24)
+    to   = parameters.delete(:to)
+    size = parameters.delete(:size)
 
-    pointer = from
+    if to.nil? && size.nil?
+      size = 1
+    end
 
     results = []
+    pointer = from
 
-    while results.size < size
+    loop do
+      break if size && size <= results.size
+      break if to   && to   <  pointer
+
       pointer += UNIT
 
       if @specifications.any? { |specification| specification.matches pointer }
